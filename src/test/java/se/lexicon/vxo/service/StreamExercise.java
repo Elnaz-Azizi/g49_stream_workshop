@@ -174,8 +174,6 @@ public class StreamExercise {
                 .findFirst();
 
 
-
-
         assertNotNull(optional);
         assertTrue(optional.isPresent());
         assertEquals(expected, optional.get());
@@ -205,9 +203,14 @@ public class StreamExercise {
     public void task12() {
         String[] expected = {"Ada", "Ana", "Anna", "Ava", "Aya", "Bob", "Ebbe", "Efe", "Eje", "Elle", "Hannah", "Maram", "Natan", "Otto"};
 
-        String[] result = null;
+        Predicate<String> palidromeNames = (name) -> name.equalsIgnoreCase(new StringBuilder(name).reverse().toString());
+        String[] result = people.stream()
+                .map(person -> person.getFirstName())
+                .distinct()
+                .filter(palidromeNames)
+                .sorted()
+                .toArray(String[]::new);
 
-        //TODO:Write code here
 
         assertNotNull(result);
         assertArrayEquals(expected, result);
