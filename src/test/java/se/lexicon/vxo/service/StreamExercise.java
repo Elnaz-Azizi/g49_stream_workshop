@@ -7,8 +7,12 @@ import se.lexicon.vxo.model.PersonDto;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,11 +44,9 @@ public class StreamExercise {
      */
     @Test
     public void task2() {
-        long amount = 0;
+        long actualAmount = people.stream().count();
 
-        //TODO:Write code here
-
-        assertEquals(10000, amount);
+        assertEquals(10000, actualAmount);
     }
 
     /**
@@ -55,7 +57,7 @@ public class StreamExercise {
         long amount = 0;
         int expected = 90;
 
-        //TODO:Write code here
+        amount = people.stream().filter(person -> person.getLastName().equals("Andersson")).count();
 
         assertEquals(expected, amount);
     }
@@ -66,7 +68,7 @@ public class StreamExercise {
     @Test
     public void task4() {
         int expectedSize = 4988;
-        List<Person> females = null;
+        List<Person> females = people.stream().filter(person -> person.getGender() == Gender.FEMALE).collect(Collectors.toList());
 
         //TODO:Write code here
 
@@ -81,9 +83,8 @@ public class StreamExercise {
     @Test
     public void task5() {
         int expectedSize = 8882;
-        Set<LocalDate> dates = null;
+        Set<LocalDate> dates = people.stream().map(Person::getDateOfBirth).collect(Collectors.toCollection(TreeSet::new));
 
-        //TODO:Write code here
 
         assertNotNull(dates);
         assertTrue(dates instanceof TreeSet);
@@ -97,9 +98,8 @@ public class StreamExercise {
     public void task6() {
         int expectedLength = 3;
 
-        Person[] result = null;
+        Person[] result = people.stream().filter(person -> person.getFirstName().equals("Erik")).toArray(Person[]::new);
 
-        //TODO:Write code here
 
         assertNotNull(result);
         assertEquals(expectedLength, result.length);
@@ -112,9 +112,8 @@ public class StreamExercise {
     public void task7() {
         Person expected = new Person(5436, "Tea", "Håkansson", LocalDate.parse("1968-01-25"), Gender.FEMALE);
 
-        Optional<Person> optional = null;
+        Optional<Person> optional = people.stream().filter(person -> person.getPersonId() == 5436).findFirst();
 
-        //TODO:Write code here
 
         assertNotNull(optional);
         assertTrue(optional.isPresent());
@@ -128,9 +127,8 @@ public class StreamExercise {
     public void task8() {
         LocalDate expectedBirthDate = LocalDate.parse("1910-01-02");
 
-        Optional<Person> optional = null;
+        Optional<Person> optional = people.stream().min((o1, o2) -> o1.getDateOfBirth().compareTo(o2.getDateOfBirth()));
 
-        //TODO:Write code here
 
         assertNotNull(optional);
         assertEquals(expectedBirthDate, optional.get().getDateOfBirth());
@@ -143,10 +141,16 @@ public class StreamExercise {
     public void task9() {
         int expectedSize = 892;
         LocalDate date = LocalDate.parse("1920-01-01");
+        Predicate<Person> birthdayBefore = person -> person.getDateOfBirth().isBefore(date);
+        Function<Person, PersonDto> convertPersonToDTO = person -> new PersonDto(person.getPersonId(), person.getFirstName() + " " + person.getLastName());
 
-        List<PersonDto> dtoList = null;
+      /*  List<PersonDto> dtoList = people.stream().filter(person -> person.getDateOfBirth().isBefore(date)).map(person -> {
+            PersonDto personDto = new PersonDto(person.getPersonId(), person.getFirstName() + " " + person.getLastName());
+            return personDto;
+        }).collect(Collectors.toList());*/
 
-        //TODO:Write code here
+        List<PersonDto> dtoList = people.stream().filter(birthdayBefore).map(convertPersonToDTO).collect(Collectors.toList());
+
 
         assertNotNull(dtoList);
         assertEquals(expectedSize, dtoList.size());
@@ -160,10 +164,17 @@ public class StreamExercise {
     public void task10() {
         String expected = "WEDNESDAY 19 DECEMBER 2012";
         int personId = 5914;
+        Predicate<Person> personId5914 = person -> person.getPersonId() == personId;
 
-        Optional<String> optional = null;
 
-        //TODO:Write code here
+        Optional<String> optional = people.stream()
+                .filter(personId5914)
+                .map(person -> person.getDateOfBirth())
+                .map(localDate -> localDate.getDayOfWeek() + " " + localDate.getDayOfMonth() + " " + localDate.getMonth() + " " + localDate.getYear())
+                .findFirst();
+
+
+
 
         assertNotNull(optional);
         assertTrue(optional.isPresent());
